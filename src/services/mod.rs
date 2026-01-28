@@ -1,9 +1,6 @@
 use crate::establish_connection;
 use crate::models::{NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart};
-use crate::repositories::{
-    create_categories, create_routine, create_routine_part, get_category_names, get_routine_by_id,
-    get_routine_parts, get_routine_parts_by_routine_id, get_routine_parts_single, get_routines,
-};
+use crate::repositories::{create_categories, create_routine, create_routine_part, delete_routine, get_category_names, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id, get_routine_parts_single, get_routines};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -170,4 +167,9 @@ pub fn select_routine_parts_by_id(
 pub fn select_category_names() -> Result<Vec<String>, diesel::result::Error> {
     let mut conn = establish_connection();
     get_category_names(&mut conn)
+}
+
+pub fn remove_routine(id: i32) -> Result<usize, diesel::result::Error> {
+    let mut conn = establish_connection();
+    delete_routine(&mut conn, id)
 }

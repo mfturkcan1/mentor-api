@@ -15,6 +15,7 @@ diesel::table! {
         start_hour -> Timestamptz,
         end_hour -> Timestamptz,
         routine_id -> Int4,
+        delete_date -> Nullable<Timestamptz>,
     }
 }
 

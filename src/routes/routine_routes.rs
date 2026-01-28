@@ -2,13 +2,9 @@ use crate::routes::{IdRequest, get_response_from_diesel_result};
 use axum::extract::{Path, Query};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::routing::{get, post};
+use axum::routing::{get, post, delete};
 use axum::{Json, Router};
-use mentor_api::services::{
-    CreateRoutinePartRequest, CreateRoutineRequest, create_routine_parts,
-    create_routine_with_parts, select_category_names, select_only_routines, select_routine_by_id,
-    select_routine_parts_by_id, select_routines,
-};
+use mentor_api::services::{CreateRoutinePartRequest, CreateRoutineRequest, create_routine_parts, create_routine_with_parts, select_category_names, select_only_routines, select_routine_by_id, select_routine_parts_by_id, select_routines, remove_routine};
 
 async fn create_routine(
     Json(payload): Json<CreateRoutineRequest>,
@@ -51,6 +47,13 @@ async fn get_routine_by_id(
     get_response_from_diesel_result(routine_response)
 }
 
+async fn delete_routine_by_id_endpoint(
+    Path(IdRequest{id}): Path<IdRequest>,
+)-> Result<impl IntoResponse, StatusCode> {
+    let routine_response = remove_routine(id);
+    get_response_from_diesel_result(routine_response)
+}
+
 async fn get_category_names_endpoint() -> Result<impl IntoResponse, StatusCode> {
     let names = select_category_names();
     get_response_from_diesel_result(names)
@@ -60,6 +63,7 @@ pub fn init_routes() -> Router {
     Router::new()
         .route("/routine", get(get_routines_endpoint))
         .route("/routine/{id}", get(get_routine_by_id))
+        .route("/routine/{id}", delete(delete_routine_by_id_endpoint))
         .route("/routine", post(create_routine))
         .route("/routine/only", get(get_routines_only_endpoint))
         .route("/routine/parts/append", post(append_routine_parts))

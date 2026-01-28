@@ -32,6 +32,7 @@ pub struct RoutinePart {
     pub start_hour: DateTime<Utc>,
     pub end_hour: DateTime<Utc>,
     pub routine_id: i32,
+    pub delete_date: Option<DateTime<Utc>>,
 }
 
 #[derive(Queryable, Selectable, Insertable, Associations, Debug, PartialEq)]
