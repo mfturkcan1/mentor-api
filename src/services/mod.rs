@@ -1,6 +1,12 @@
 use crate::establish_connection;
-use crate::models::{NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart};
-use crate::repositories::{create_categories, create_routine, create_routine_part, delete_routine, get_category_names, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id, get_routine_parts_single, get_routines};
+use crate::models::{
+    Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart,
+};
+use crate::repositories::{
+    create_categories, create_routine, create_routine_part, delete_routine, get_category_names,
+    get_goals, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id,
+    get_routine_parts_single, get_routines, insert_goals,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -92,17 +98,29 @@ pub fn create_routine_parts(
 ) -> Result<(), diesel::result::Error> {
     let mut conn = establish_connection();
 
-    let new_routine_parts = parts
-        .iter()
-        .map(|part| NewRoutinePart {
+    let mut new_routine_parts = Vec::new();
+    let mut categories = HashSet::new();
+    for part in parts.iter() {
+        let routine_part = NewRoutinePart {
             description: part.description.as_str(),
             start_hour: part.start_hour,
             end_hour: part.end_hour,
             routine_id: route_id,
-        })
-        .collect::<Vec<NewRoutinePart>>();
+        };
+        let new_category = NewCategory {
+            name: part.description.clone(),
+        };
+
+        new_routine_parts.push(routine_part);
+        categories.insert(new_category);
+    }
 
     _ = create_routine_part(&mut conn, new_routine_parts)?;
+
+    if !categories.is_empty() {
+        _ = create_categories(&mut conn, categories)?;
+    }
+
     Ok(())
 }
 
@@ -172,4 +190,14 @@ pub fn select_category_names() -> Result<Vec<String>, diesel::result::Error> {
 pub fn remove_routine(id: i32) -> Result<usize, diesel::result::Error> {
     let mut conn = establish_connection();
     delete_routine(&mut conn, id)
+}
+
+pub fn select_goals() -> Result<Vec<Goals>, diesel::result::Error> {
+    let mut conn = establish_connection();
+    get_goals(&mut conn)
+}
+
+pub fn add_goals(new_goals: Vec<NewGoal>) -> Result<Vec<Goals>, diesel::result::Error> {
+    let mut conn = establish_connection();
+    insert_goals(&mut conn, new_goals)
 }

@@ -1,5 +1,7 @@
-use crate::models::{NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart};
-use crate::schema::{categories, routine_parts, routines};
+use crate::models::{
+    Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart,
+};
+use crate::schema::{categories, goals, routine_parts, routines};
 use chrono::Utc;
 use diesel::{
     BelongingToDsl, BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
@@ -122,4 +124,21 @@ pub fn delete_routine(conn: &mut PgConnection, id: i32) -> Result<usize, diesel:
         .filter(routine_parts::routine_id.eq(id))
         .set(routine_parts::delete_date.eq(Utc::now()))
         .execute(conn)
+}
+
+pub fn insert_goals(
+    conn: &mut PgConnection,
+    new_goals: Vec<NewGoal>,
+) -> Result<Vec<Goals>, diesel::result::Error> {
+    diesel::insert_into(goals::table)
+        .values(&new_goals)
+        .returning(Goals::as_returning())
+        .get_results(conn)
+}
+
+pub fn get_goals(conn: &mut PgConnection) -> Result<Vec<Goals>, diesel::result::Error> {
+    goals::table
+        .filter(goals::delete_date.is_null())
+        .select(Goals::as_select())
+        .get_results(conn)
 }

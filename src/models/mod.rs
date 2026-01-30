@@ -1,7 +1,8 @@
-use crate::schema::{categories, routine_parts, routines};
+use crate::schema::{categories, goals, routine_parts, routines};
 use chrono::{DateTime, Utc};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
-use serde::Serialize;
+use diesel_derive_enum::DbEnum;
+use serde::{Deserialize, Serialize};
 use std::hash::Hash;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize)]
@@ -62,4 +63,71 @@ impl Hash for NewCategory {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.name.hash(state);
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[ExistingTypePath = "crate::schema::sql_types::GoalPeriodType"]
+#[DbValueStyle = "SCREAMING_SNAKE_CASE"]
+pub enum GoalPeriodType {
+    Month,
+    Year,
+    Deadline,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[ExistingTypePath = "crate::schema::sql_types::GoalStatus"]
+#[DbValueStyle = "SCREAMING_SNAKE_CASE"]
+pub enum GoalStatus {
+    Planned,
+    Active,
+    Done,
+    Canceled,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[ExistingTypePath = "crate::schema::sql_types::GoalPriority"]
+#[DbValueStyle = "SCREAMING_SNAKE_CASE"]
+pub enum GoalPriority {
+    Low,
+    Medium,
+    High,
+    Critical,
+}
+
+#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize)]
+#[diesel(table_name = goals)]
+pub struct Goals {
+    pub id: i32,
+    pub title: String,
+    pub description: Option<String>,
+    pub period_type: GoalPeriodType,
+    pub deadline_at: Option<DateTime<Utc>>,
+    pub period_start: Option<DateTime<Utc>>,
+    pub period_end: Option<DateTime<Utc>>,
+    pub status: GoalStatus,
+    pub priority: GoalPriority,
+    pub target_value: Option<i32>,
+    pub current_value: i32,
+    pub unit: Option<String>,
+    pub parent_goal_id: Option<i32>,
+    pub create_date: DateTime<Utc>,
+    pub update_date: DateTime<Utc>,
+    pub delete_date: Option<DateTime<Utc>>,
+}
+
+#[derive(Insertable, Debug, PartialEq, Serialize, Deserialize)]
+#[diesel(table_name = goals)]
+pub struct NewGoal {
+    pub title: String,
+    pub description: Option<String>,
+    pub period_type: GoalPeriodType,
+    pub deadline_at: Option<DateTime<Utc>>,
+    pub period_start: Option<DateTime<Utc>>,
+    pub period_end: Option<DateTime<Utc>>,
+    pub status: GoalStatus,
+    pub priority: GoalPriority,
+    pub target_value: Option<i32>,
+    pub current_value: Option<i32>,
+    pub unit: Option<String>,
+    pub parent_goal_id: Option<i32>,
 }
