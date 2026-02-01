@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS goals (
     period_type     goal_period_type NOT NULL,
 
     deadline_at     TIMESTAMPTZ NULL,
-    period_start    DATE NULL,
-    period_end      DATE NULL,
+    period_start    TIMESTAMPTZ NULL,
+    period_end      TIMESTAMPTZ NULL,
 
     status          goal_status NOT NULL DEFAULT 'PLANNED',
     priority        goal_priority NOT NULL DEFAULT 'MEDIUM',

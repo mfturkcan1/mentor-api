@@ -1,5 +1,7 @@
 use crate::schema::{categories, goals, routine_parts, routines};
 use chrono::{DateTime, Utc};
+use diesel::deserialize::QueryableByName;
+use diesel::sql_types::{BigInt, Text, Timestamptz};
 use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
@@ -94,6 +96,16 @@ pub enum GoalPriority {
     Critical,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[ExistingTypePath = "crate::schema::sql_types::GoalLifeCycle"]
+#[DbValueStyle = "SCREAMING_SNAKE_CASE"]
+pub enum GoalLifeCycle {
+    ShortTerm,
+    MediumTerm,
+    LongTerm,
+    LifeTime,
+}
+
 #[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize)]
 #[diesel(table_name = goals)]
 pub struct Goals {
@@ -110,6 +122,7 @@ pub struct Goals {
     pub current_value: i32,
     pub unit: Option<String>,
     pub parent_goal_id: Option<i32>,
+    pub goal_cycle: GoalLifeCycle,
     pub create_date: DateTime<Utc>,
     pub update_date: DateTime<Utc>,
     pub delete_date: Option<DateTime<Utc>>,
@@ -126,8 +139,30 @@ pub struct NewGoal {
     pub period_end: Option<DateTime<Utc>>,
     pub status: GoalStatus,
     pub priority: GoalPriority,
+    pub goal_cycle: GoalLifeCycle,
     pub target_value: Option<i32>,
     pub current_value: Option<i32>,
     pub unit: Option<String>,
     pub parent_goal_id: Option<i32>,
+}
+
+#[derive(Debug, QueryableByName, Serialize)]
+pub struct RoutinePartUsageRow {
+    #[diesel(sql_type = Timestamptz)]
+    pub month: DateTime<Utc>,
+
+    #[diesel(sql_type = Text)]
+    pub description: String,
+
+    #[diesel(sql_type = BigInt)]
+    pub total_minutes: i64,
+
+    #[diesel(sql_type = BigInt)]
+    pub item_count: i64,
+}
+
+#[derive(Debug, Serialize)]
+pub struct RoutinePartGroupedRows {
+    pub month: DateTime<Utc>,
+    pub rows: Vec<RoutinePartUsageRow>,
 }

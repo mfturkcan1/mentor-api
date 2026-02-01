@@ -42,11 +42,17 @@ pub mod sql_types {
     #[derive(diesel::sql_types::SqlType, diesel::query_builder::QueryId)]
     #[diesel(postgres_type(name = "goal_priority"))]
     pub struct GoalPriority;
+
+    // CREATE TYPE goal_life_cycle AS ENUM ('SHORT_TERM', 'MEDIUM_TERM', 'LONG_TERM', 'LIFE_TIME');
+
+    #[derive(diesel::sql_types::SqlType, diesel::query_builder::QueryId)]
+    #[diesel(postgres_type(name = "goal_life_cycle"))]
+    pub struct GoalLifeCycle;
 }
 
 diesel::table! {
     use diesel::sql_types::*;
-    use super::sql_types::{GoalPeriodType, GoalStatus, GoalPriority};
+    use super::sql_types::{GoalPeriodType, GoalStatus, GoalPriority, GoalLifeCycle};
 
     goals(id){
         id -> Int4,
@@ -62,6 +68,7 @@ diesel::table! {
         current_value -> Int4,
         unit -> Nullable<Text>,
         parent_goal_id -> Nullable<Int4>,
+        goal_cycle -> GoalLifeCycle,
         create_date -> Timestamptz,
         update_date -> Timestamptz,
         delete_date -> Nullable<Timestamptz>,

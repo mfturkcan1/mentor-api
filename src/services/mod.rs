@@ -1,15 +1,9 @@
 use crate::establish_connection;
-use crate::models::{
-    Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart,
-};
-use crate::repositories::{
-    create_categories, create_routine, create_routine_part, delete_routine, get_category_names,
-    get_goals, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id,
-    get_routine_parts_single, get_routines, insert_goals,
-};
+use crate::models::{Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart, RoutinePartUsageRow};
+use crate::repositories::{create_categories, create_routine, create_routine_part, delete_goal, delete_routine, delete_routine_part, get_category_names, get_goals, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id, get_routine_parts_single, get_routines, insert_goals, select_routine_parts_usage};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Deserialize)]
 pub struct CreateRoutineRequest {
@@ -192,6 +186,11 @@ pub fn remove_routine(id: i32) -> Result<usize, diesel::result::Error> {
     delete_routine(&mut conn, id)
 }
 
+pub fn remove_routine_part(id: i32)-> Result<usize, diesel::result::Error>{
+    let mut conn = establish_connection();
+    delete_routine_part(&mut conn, id)
+}
+
 pub fn select_goals() -> Result<Vec<Goals>, diesel::result::Error> {
     let mut conn = establish_connection();
     get_goals(&mut conn)
@@ -200,4 +199,14 @@ pub fn select_goals() -> Result<Vec<Goals>, diesel::result::Error> {
 pub fn add_goals(new_goals: Vec<NewGoal>) -> Result<Vec<Goals>, diesel::result::Error> {
     let mut conn = establish_connection();
     insert_goals(&mut conn, new_goals)
+}
+
+pub fn remove_goal(id:i32) -> Result<usize, diesel::result::Error>{
+    let mut conn = establish_connection();
+    delete_goal(&mut conn, id)
+}
+
+pub fn select_routine_parts_group_by_result()-> Result<HashMap<DateTime<Utc>, Vec<RoutinePartUsageRow>>, diesel::result::Error>{
+    let mut conn = establish_connection();
+    select_routine_parts_usage(&mut conn)
 }

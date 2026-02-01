@@ -1,13 +1,14 @@
 use crate::models::{
     Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart,
+    RoutinePartUsageRow,
 };
 use crate::schema::{categories, goals, routine_parts, routines};
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use diesel::{
     BelongingToDsl, BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
     RunQueryDsl, SelectableHelper,
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub fn create_routine(
     conn: &mut PgConnection,
@@ -126,6 +127,16 @@ pub fn delete_routine(conn: &mut PgConnection, id: i32) -> Result<usize, diesel:
         .execute(conn)
 }
 
+pub fn delete_routine_part(
+    conn: &mut PgConnection,
+    id: i32,
+) -> Result<usize, diesel::result::Error> {
+    diesel::update(routine_parts::table)
+        .filter(routine_parts::id.eq(id))
+        .set(routine_parts::delete_date.eq(Utc::now()))
+        .execute(conn)
+}
+
 pub fn insert_goals(
     conn: &mut PgConnection,
     new_goals: Vec<NewGoal>,
@@ -141,4 +152,47 @@ pub fn get_goals(conn: &mut PgConnection) -> Result<Vec<Goals>, diesel::result::
         .filter(goals::delete_date.is_null())
         .select(Goals::as_select())
         .get_results(conn)
+}
+
+pub fn delete_goal(conn: &mut PgConnection, id: i32) -> Result<usize, diesel::result::Error> {
+    diesel::update(goals::table)
+        .filter(goals::id.eq(id))
+        .set(goals::delete_date.eq(Utc::now()))
+        .execute(conn)
+}
+
+pub fn select_routine_parts_usage(
+    conn: &mut PgConnection,
+) -> Result<HashMap<DateTime<Utc>, Vec<RoutinePartUsageRow>>, diesel::result::Error> {
+    let sql = r#"
+        SELECT
+            date_trunc('month', rp.start_hour) AS month,
+            rp.description AS description,
+            SUM(
+                (EXTRACT(EPOCH FROM (
+                    CASE
+                        WHEN rp.end_hour >= rp.start_hour THEN rp.end_hour - rp.start_hour
+                        ELSE (rp.end_hour + INTERVAL '1 day') - rp.start_hour
+                    END
+                )) / 60)::int
+            )::bigint AS total_minutes,
+            COUNT(*)::bigint AS item_count
+        FROM routine_parts rp
+        WHERE rp.delete_date IS NULL
+        GROUP BY 1, 2
+        ORDER BY total_minutes DESC;
+    "#;
+
+    let rows = diesel::sql_query(sql).load::<RoutinePartUsageRow>(conn)?;
+
+    let mut grouped_rows: HashMap<DateTime<Utc>, Vec<RoutinePartUsageRow>> = HashMap::new();
+
+    for row in rows.into_iter() {
+        grouped_rows
+            .entry(row.month)
+            .or_default()
+            .push(row);
+    }
+
+    Ok(grouped_rows)
 }
