@@ -1,8 +1,10 @@
+pub mod goal_repository;
+
 use crate::models::{
-    Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart,
+     NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart,
     RoutinePartUsageRow,
 };
-use crate::schema::{categories, goals, routine_parts, routines};
+use crate::schema::{categories, routine_parts, routines};
 use chrono::{DateTime, Utc};
 use diesel::{
     BelongingToDsl, BoolExpressionMethods, ExpressionMethods, PgConnection, QueryDsl, QueryResult,
@@ -137,30 +139,6 @@ pub fn delete_routine_part(
         .execute(conn)
 }
 
-pub fn insert_goals(
-    conn: &mut PgConnection,
-    new_goals: Vec<NewGoal>,
-) -> Result<Vec<Goals>, diesel::result::Error> {
-    diesel::insert_into(goals::table)
-        .values(&new_goals)
-        .returning(Goals::as_returning())
-        .get_results(conn)
-}
-
-pub fn get_goals(conn: &mut PgConnection) -> Result<Vec<Goals>, diesel::result::Error> {
-    goals::table
-        .filter(goals::delete_date.is_null())
-        .select(Goals::as_select())
-        .get_results(conn)
-}
-
-pub fn delete_goal(conn: &mut PgConnection, id: i32) -> Result<usize, diesel::result::Error> {
-    diesel::update(goals::table)
-        .filter(goals::id.eq(id))
-        .set(goals::delete_date.eq(Utc::now()))
-        .execute(conn)
-}
-
 pub fn select_routine_parts_usage(
     conn: &mut PgConnection,
 ) -> Result<HashMap<DateTime<Utc>, Vec<RoutinePartUsageRow>>, diesel::result::Error> {
@@ -188,10 +166,7 @@ pub fn select_routine_parts_usage(
     let mut grouped_rows: HashMap<DateTime<Utc>, Vec<RoutinePartUsageRow>> = HashMap::new();
 
     for row in rows.into_iter() {
-        grouped_rows
-            .entry(row.month)
-            .or_default()
-            .push(row);
+        grouped_rows.entry(row.month).or_default().push(row);
     }
 
     Ok(grouped_rows)

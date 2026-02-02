@@ -8,21 +8,21 @@ use mentor_api::models::NewGoal;
 use mentor_api::services::{add_goals, remove_goal, select_goals};
 
 async fn get_goals_endpoint() -> Result<impl IntoResponse, StatusCode> {
-    let goals = select_goals();
+    let goals = select_goals().await;
     get_response_from_diesel_result(goals)
 }
 
 async fn insert_goals_endpoint(
     Json(payload): Json<Vec<NewGoal>>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let goals = add_goals(payload);
+    let goals = add_goals(payload).await;
     get_response_from_diesel_result(goals)
 }
 
 async fn delete_goal_endpoint(
     Query(id): Query<IdRequest>
 ) -> Result<impl IntoResponse, StatusCode>{
-    let result = remove_goal(id.id);
+    let result = remove_goal(id.id).await;
     get_response_from_diesel_result(result)
 }
 
