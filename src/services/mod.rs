@@ -1,13 +1,12 @@
+pub mod goal_service;
+
 use crate::models::{
-    Goals, NewCategory, NewGoal, NewRoutine, NewRoutinePart, Routine, RoutinePart,
-    RoutinePartUsageRow,
+    NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart, RoutinePartUsageRow,
 };
-use crate::repositories::goal_repository::{delete_goal, get_goals, insert_goals};
 use crate::repositories::{
-    create_categories, create_routine, create_routine_part, delete_routine,
-    delete_routine_part, get_category_names, get_routine_by_id, get_routine_parts,
-    get_routine_parts_by_routine_id, get_routine_parts_single, get_routines,
-    select_routine_parts_usage,
+    create_categories, create_routine, create_routine_part, delete_routine, delete_routine_part,
+    get_category_names, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id,
+    get_routine_parts_single, get_routines, select_routine_parts_usage,
 };
 use crate::{establish_async_connection, establish_connection};
 use chrono::{DateTime, Utc};
@@ -198,21 +197,6 @@ pub fn remove_routine(id: i32) -> Result<usize, diesel::result::Error> {
 pub fn remove_routine_part(id: i32) -> Result<usize, diesel::result::Error> {
     let mut conn = establish_connection();
     delete_routine_part(&mut conn, id)
-}
-
-pub async fn select_goals() -> Result<Vec<Goals>, diesel::result::Error> {
-    let mut conn = establish_async_connection().await;
-    get_goals(&mut conn).await
-}
-
-pub async fn add_goals(new_goals: Vec<NewGoal>) -> Result<Vec<Goals>, diesel::result::Error> {
-    let mut conn = establish_async_connection().await;
-    insert_goals(&mut conn, new_goals).await
-}
-
-pub async fn remove_goal(id: i32) -> Result<usize, diesel::result::Error> {
-    let mut conn = establish_async_connection().await;
-    delete_goal(&mut conn, id).await
 }
 
 pub fn select_routine_parts_group_by_result()

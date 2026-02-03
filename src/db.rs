@@ -2,8 +2,8 @@ use deadpool::managed::{BuildError, Object, PoolError};
 use diesel_async::AsyncPgConnection;
 use diesel_async::pooled_connection::deadpool::Pool;
 use diesel_async::pooled_connection::{AsyncDieselConnectionManager, PoolError as ConnPoolError};
-use std::env;
 use dotenvy::dotenv;
+use std::env;
 
 pub type AsyncPool = deadpool::managed::Pool<AsyncDieselConnectionManager<AsyncPgConnection>>;
 pub type AsyncPoolObject = Object<AsyncDieselConnectionManager<AsyncPgConnection>>;
@@ -17,6 +17,6 @@ pub fn establish_connection_pool() -> Result<AsyncPool, BuildError> {
     Pool::builder(config).build()
 }
 
-pub async fn get_from_pool(pool: AsyncPool) -> Result<AsyncPoolObject, AsyncPoolError> {
-    pool.get().await
+pub async fn get_from_pool(pool: AsyncPool) -> AsyncPoolObject {
+    pool.get().await.expect("could not get pool object")
 }

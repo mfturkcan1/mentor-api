@@ -1,10 +1,15 @@
-use crate::routes::{IdRequest, get_response_from_diesel_result};
+use crate::routes::{AppState, IdRequest, get_response_from_diesel_result};
 use axum::extract::{Path, Query};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::{delete, get, post};
 use axum::{Json, Router};
-use mentor_api::services::{CreateRoutinePartRequest, CreateRoutineRequest, create_routine_parts, create_routine_with_parts, remove_routine, remove_routine_part, select_category_names, select_only_routines, select_routine_by_id, select_routine_parts_by_id, select_routines, select_routine_parts_group_by_result};
+use mentor_api::services::{
+    CreateRoutinePartRequest, CreateRoutineRequest, create_routine_parts,
+    create_routine_with_parts, remove_routine, remove_routine_part, select_category_names,
+    select_only_routines, select_routine_by_id, select_routine_parts_by_id,
+    select_routine_parts_group_by_result, select_routines,
+};
 
 async fn create_routine(
     Json(payload): Json<CreateRoutineRequest>,
@@ -66,12 +71,12 @@ async fn get_category_names_endpoint() -> Result<impl IntoResponse, StatusCode> 
     get_response_from_diesel_result(names)
 }
 
-async fn get_routine_parts_groups_endpoint() -> Result<impl IntoResponse, StatusCode>{
+async fn get_routine_parts_groups_endpoint() -> Result<impl IntoResponse, StatusCode> {
     let res = select_routine_parts_group_by_result();
     get_response_from_diesel_result(res)
 }
 
-pub fn init_routes() -> Router {
+pub fn init_routes() -> Router<AppState> {
     Router::new()
         .route("/routine", get(get_routines_endpoint))
         .route("/routine/{id}", get(get_routine_by_id))
@@ -79,7 +84,10 @@ pub fn init_routes() -> Router {
         .route("/routine", post(create_routine))
         .route("/routine/only", get(get_routines_only_endpoint))
         .route("/routine/parts/append", post(append_routine_parts))
-        .route("/routine/parts/group", get(get_routine_parts_groups_endpoint))
+        .route(
+            "/routine/parts/group",
+            get(get_routine_parts_groups_endpoint),
+        )
         .route("/routine/parts", delete(delete_routine_part_by_id_endpoint))
         .route(
             "/routine/parts",

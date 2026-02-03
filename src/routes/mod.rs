@@ -1,6 +1,9 @@
 use axum::Json;
-use axum::http::StatusCode;
+use axum::body::Body;
+use axum::http::{Response, StatusCode};
 use axum::response::IntoResponse;
+use diesel::ConnectionError;
+use diesel::result::Error;
 use mentor_api::db::{AsyncPool, establish_connection_pool};
 use serde::{Deserialize, Serialize};
 use tower_http::cors::{Any, CorsLayer};
@@ -25,17 +28,26 @@ pub struct IdRequest {
 }
 
 pub fn get_response_from_diesel_result<T: Serialize>(
-    t: Result<T, diesel::result::Error>,
+    t: Result<T, Error>,
 ) -> Result<impl IntoResponse, StatusCode> {
     match t {
         Ok(r) => Ok(Json(r).into_response()),
-        Err(e) => {
-            let errors_response = ErrorResponse {
-                error: e.to_string(),
-            };
-            Ok((StatusCode::INTERNAL_SERVER_ERROR, Json(errors_response)).into_response())
-        }
+        Err(e) => get_error_response(e),
     }
+}
+
+pub fn get_error_response(e: Error) -> Result<Response<Body>, StatusCode> {
+    let errors_response = ErrorResponse {
+        error: e.to_string(),
+    };
+    Ok((StatusCode::INTERNAL_SERVER_ERROR, Json(errors_response)).into_response())
+}
+
+pub fn get_error_response_connection(e: ConnectionError) -> Result<Response<Body>, StatusCode> {
+    let errors_response = ErrorResponse {
+        error: e.to_string(),
+    };
+    Ok((StatusCode::INTERNAL_SERVER_ERROR, Json(errors_response)).into_response())
 }
 
 #[derive(Clone)]
@@ -55,8 +67,8 @@ pub fn init_routes() -> OpenApiRouter {
         .allow_headers(Any);
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
-        .with_state(state)
         .merge(goal_routes::init_routes())
         .merge(OpenApiRouter::from(routine_routes::init_routes()))
         .layer(cors_layer)
+        .with_state(state)
 }
