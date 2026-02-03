@@ -6,6 +6,7 @@ use diesel::{Associations, Identifiable, Insertable, Queryable, Selectable};
 use diesel_derive_enum::DbEnum;
 use serde::{Deserialize, Serialize};
 use std::hash::Hash;
+use utoipa::ToSchema;
 
 #[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize)]
 #[diesel(table_name = routines)]
@@ -67,7 +68,7 @@ impl Hash for NewCategory {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, ToSchema)]
 #[ExistingTypePath = "crate::schema::sql_types::GoalPeriodType"]
 #[DbValueStyle = "SCREAMING_SNAKE_CASE"]
 pub enum GoalPeriodType {
@@ -76,7 +77,7 @@ pub enum GoalPeriodType {
     Deadline,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, ToSchema)]
 #[ExistingTypePath = "crate::schema::sql_types::GoalStatus"]
 #[DbValueStyle = "SCREAMING_SNAKE_CASE"]
 pub enum GoalStatus {
@@ -86,7 +87,7 @@ pub enum GoalStatus {
     Canceled,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, ToSchema)]
 #[ExistingTypePath = "crate::schema::sql_types::GoalPriority"]
 #[DbValueStyle = "SCREAMING_SNAKE_CASE"]
 pub enum GoalPriority {
@@ -96,7 +97,7 @@ pub enum GoalPriority {
     Critical,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, DbEnum, Serialize, Deserialize, ToSchema)]
 #[ExistingTypePath = "crate::schema::sql_types::GoalLifeCycle"]
 #[DbValueStyle = "SCREAMING_SNAKE_CASE"]
 pub enum GoalLifeCycle {
@@ -106,7 +107,7 @@ pub enum GoalLifeCycle {
     LifeTime,
 }
 
-#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize)]
+#[derive(Queryable, Identifiable, Selectable, Debug, PartialEq, Serialize, ToSchema)]
 #[diesel(table_name = goals)]
 pub struct Goals {
     pub id: i32,
@@ -128,7 +129,7 @@ pub struct Goals {
     pub delete_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Insertable, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Insertable, Debug, PartialEq, Serialize, Deserialize, ToSchema)]
 #[diesel(table_name = goals)]
 pub struct NewGoal {
     pub title: String,

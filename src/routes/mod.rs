@@ -1,11 +1,18 @@
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::{Json, Router};
+use mentor_api::db::{AsyncPool, establish_connection_pool};
 use serde::{Deserialize, Serialize};
 use tower_http::cors::{Any, CorsLayer};
+use utoipa::OpenApi;
+use utoipa_axum::router::OpenApiRouter;
 
 mod goal_routes;
 mod routine_routes;
+
+#[derive(OpenApi)]
+#[openapi(info(title = "Mentor API", version = "1.0", description = "An mentor API"))]
+pub struct ApiDoc;
 
 #[derive(Serialize)]
 pub struct ErrorResponse {
@@ -31,14 +38,25 @@ pub fn get_response_from_diesel_result<T: Serialize>(
     }
 }
 
-pub fn init_routes() -> Router {
+#[derive(Clone)]
+pub struct AppState {
+    pool: AsyncPool,
+}
+
+pub fn init_routes() -> OpenApiRouter {
+    let pool =
+        establish_connection_pool().unwrap_or_else(|_| panic!("Error creating database pool"));
+
+    let state = AppState { pool };
+
     let cors_layer = CorsLayer::new()
         .allow_methods(Any)
         .allow_origin(Any)
         .allow_headers(Any);
 
-    Router::new()
-        .merge(routine_routes::init_routes())
+    OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .with_state(state)
         .merge(goal_routes::init_routes())
+        .merge(OpenApiRouter::from(routine_routes::init_routes()))
         .layer(cors_layer)
 }

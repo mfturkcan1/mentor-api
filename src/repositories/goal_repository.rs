@@ -4,7 +4,6 @@ use chrono::Utc;
 use diesel::QueryDsl;
 use diesel::{ExpressionMethods, SelectableHelper};
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
-use uuid::Uuid;
 
 pub async fn insert_goals(
     conn: &mut AsyncPgConnection,
