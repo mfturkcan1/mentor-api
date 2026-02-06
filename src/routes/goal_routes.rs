@@ -1,7 +1,4 @@
-use crate::routes::{
-    AppState, IdRequest, get_error_response, get_error_response_connection,
-    get_response_from_diesel_result,
-};
+use crate::routes::{AppState, IdRequest, get_response_from_diesel_result};
 use axum::Json;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;

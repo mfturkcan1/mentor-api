@@ -1,4 +1,4 @@
-use crate::schema::{categories, goals, routine_parts, routines};
+use crate::schema::{categories, goals, routine_parts, routines, todos};
 use chrono::{DateTime, Utc};
 use diesel::deserialize::QueryableByName;
 use diesel::sql_types::{BigInt, Text, Timestamptz};
@@ -18,7 +18,7 @@ pub struct Routine {
     pub delete_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Queryable, Insertable, Debug, PartialEq)]
+#[derive(Insertable, Debug, PartialEq)]
 #[diesel(table_name = routines)]
 pub struct NewRoutine<'a> {
     pub title: &'a str,
@@ -166,4 +166,42 @@ pub struct RoutinePartUsageRow {
 pub struct RoutinePartGroupedRows {
     pub month: DateTime<Utc>,
     pub rows: Vec<RoutinePartUsageRow>,
+}
+
+#[derive(Identifiable, Debug, PartialEq)]
+#[diesel(table_name = todos)]
+pub struct Todo {
+    pub id: uuid::Uuid,
+    pub title: String,
+    pub description: Option<String>,
+    pub parent_goal_id: Option<i32>,
+    pub completed: bool,
+    pub completed_date: Option<DateTime<Utc>>,
+    pub create_date: DateTime<Utc>,
+    pub update_date: DateTime<Utc>,
+    pub delete_date: Option<DateTime<Utc>>,
+}
+
+#[derive(Insertable, Debug, PartialEq)]
+#[diesel(table_name = todos)]
+pub struct NewTodo {
+    pub title: String,
+    pub description: Option<String>,
+    pub parent_goal_id: Option<i32>,
+    pub completed: bool,
+    pub completed_date: Option<DateTime<Utc>>,
+}
+
+#[derive(Selectable, Queryable, Debug, PartialEq)]
+#[diesel(table_name = todos)]
+pub struct TodoSelect {
+    pub id: String,
+    pub title: String,
+    pub description: Option<String>,
+    pub parent_goal_id: Option<i32>,
+    pub completed: bool,
+    pub completed_date: Option<DateTime<Utc>>,
+    pub create_date: DateTime<Utc>,
+    pub update_date: DateTime<Utc>,
+    pub delete_date: Option<DateTime<Utc>>,
 }

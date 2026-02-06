@@ -74,3 +74,19 @@ diesel::table! {
         delete_date -> Nullable<Timestamptz>,
     }
 }
+
+diesel::table! {
+    use diesel::sql_types::*;
+
+    todos(id){
+        id -> Uuid,
+        title -> Text,
+        description -> Nullable<Text>,
+        parent_goal_id -> Nullable<Int4>,
+        completed -> Bool,
+        completed_date -> Nullable<Timestamptz>,
+        create_date -> Timestamptz,
+        update_date -> Timestamptz,
+        delete_date -> Nullable<Timestamptz>,
+    }
+}

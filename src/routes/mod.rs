@@ -2,7 +2,6 @@ use axum::Json;
 use axum::body::Body;
 use axum::http::{Response, StatusCode};
 use axum::response::IntoResponse;
-use diesel::ConnectionError;
 use diesel::result::Error;
 use mentor_api::db::{AsyncPool, establish_connection_pool};
 use serde::{Deserialize, Serialize};
@@ -37,13 +36,6 @@ pub fn get_response_from_diesel_result<T: Serialize>(
 }
 
 pub fn get_error_response(e: Error) -> Result<Response<Body>, StatusCode> {
-    let errors_response = ErrorResponse {
-        error: e.to_string(),
-    };
-    Ok((StatusCode::INTERNAL_SERVER_ERROR, Json(errors_response)).into_response())
-}
-
-pub fn get_error_response_connection(e: ConnectionError) -> Result<Response<Body>, StatusCode> {
     let errors_response = ErrorResponse {
         error: e.to_string(),
     };

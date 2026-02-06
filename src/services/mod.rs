@@ -8,7 +8,7 @@ use crate::repositories::{
     get_category_names, get_routine_by_id, get_routine_parts, get_routine_parts_by_routine_id,
     get_routine_parts_single, get_routines, select_routine_parts_usage,
 };
-use crate::{establish_async_connection, establish_connection};
+use crate::{establish_connection};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
