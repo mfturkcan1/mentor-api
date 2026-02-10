@@ -85,6 +85,7 @@ diesel::table! {
         parent_goal_id -> Nullable<Int4>,
         completed -> Bool,
         completed_date -> Nullable<Timestamptz>,
+        deadline_date -> Timestamptz,
         create_date -> Timestamptz,
         update_date -> Timestamptz,
         delete_date -> Nullable<Timestamptz>,

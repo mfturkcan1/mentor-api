@@ -1,8 +1,8 @@
 pub mod goal_repository;
+pub mod todo_repository;
 
 use crate::models::{
-     NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart,
-    RoutinePartUsageRow,
+    NewCategory, NewRoutine, NewRoutinePart, Routine, RoutinePart, RoutinePartUsageRow,
 };
 use crate::schema::{categories, routine_parts, routines};
 use chrono::{DateTime, Utc};

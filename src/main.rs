@@ -1,3 +1,4 @@
+pub mod dto;
 mod routes;
 pub mod schema;
 mod server;

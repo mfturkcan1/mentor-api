@@ -168,8 +168,9 @@ pub struct RoutinePartGroupedRows {
     pub rows: Vec<RoutinePartUsageRow>,
 }
 
-#[derive(Identifiable, Debug, PartialEq)]
+#[derive(Selectable, Queryable, Identifiable, Debug, PartialEq)]
 #[diesel(table_name = todos)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Todo {
     pub id: uuid::Uuid,
     pub title: String,
@@ -177,12 +178,13 @@ pub struct Todo {
     pub parent_goal_id: Option<i32>,
     pub completed: bool,
     pub completed_date: Option<DateTime<Utc>>,
+    pub deadline_date: DateTime<Utc>,
     pub create_date: DateTime<Utc>,
     pub update_date: DateTime<Utc>,
     pub delete_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Insertable, Debug, PartialEq)]
+#[derive(Insertable, Debug, PartialEq, ToSchema, Serialize, Deserialize)]
 #[diesel(table_name = todos)]
 pub struct NewTodo {
     pub title: String,
@@ -190,18 +192,5 @@ pub struct NewTodo {
     pub parent_goal_id: Option<i32>,
     pub completed: bool,
     pub completed_date: Option<DateTime<Utc>>,
-}
-
-#[derive(Selectable, Queryable, Debug, PartialEq)]
-#[diesel(table_name = todos)]
-pub struct TodoSelect {
-    pub id: String,
-    pub title: String,
-    pub description: Option<String>,
-    pub parent_goal_id: Option<i32>,
-    pub completed: bool,
-    pub completed_date: Option<DateTime<Utc>>,
-    pub create_date: DateTime<Utc>,
-    pub update_date: DateTime<Utc>,
-    pub delete_date: Option<DateTime<Utc>>,
+    pub deadline_date: DateTime<Utc>,
 }

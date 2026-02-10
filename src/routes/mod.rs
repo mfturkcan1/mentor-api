@@ -11,7 +11,7 @@ use utoipa_axum::router::OpenApiRouter;
 
 mod goal_routes;
 mod routine_routes;
-
+mod todo_routes;
 #[derive(OpenApi)]
 #[openapi(info(title = "Mentor API", version = "1.0", description = "An mentor API"))]
 pub struct ApiDoc;
@@ -60,6 +60,7 @@ pub fn init_routes() -> OpenApiRouter {
 
     OpenApiRouter::with_openapi(ApiDoc::openapi())
         .merge(goal_routes::init_routes())
+        .merge(todo_routes::init_routes())
         .merge(OpenApiRouter::from(routine_routes::init_routes()))
         .layer(cors_layer)
         .with_state(state)

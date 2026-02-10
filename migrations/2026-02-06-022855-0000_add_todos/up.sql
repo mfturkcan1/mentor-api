@@ -8,9 +8,12 @@ CREATE TABLE IF NOT EXISTS todos(
 
     parent_goal_id  INTEGER,
 
-    completed BOOLEAN DEFAULT FALSE,
 
+    completed BOOLEAN DEFAULT FALSE,
     completed_date TIMESTAMPTZ,
+
+    deadline_date TIMESTAMPTZ NOT NULL,
+
     create_date      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     update_date      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     delete_date      TIMESTAMPTZ,
